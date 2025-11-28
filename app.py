@@ -38,7 +38,7 @@ if uploaded:
         st.stop()
 
     # Conversion en DataFrame avec datetime
-    obs_series = ds_obs["T"].to_series()  # index = datetime
+    obs_series = ds_obs["T"].to_series()
     df_obs = obs_series.reset_index()
     df_obs.rename(columns={"T": "T", "time": "time"}, inplace=True)
     df_obs["year"] = df_obs["time"].dt.year
@@ -68,7 +68,9 @@ if uploaded:
         # Moyenne sur 10 ans position par position
         obs_moyenne_tri = np.mean(obs_mois_10ans, axis=0)
 
-        val_rmse = rmse(mod_sorted, obs_moyenne_tri)
+        # Aligner la longueur avec le modèle si besoin
+        n = min(len(mod_sorted), len(obs_moyenne_tri))
+        val_rmse = rmse(mod_sorted[:n], obs_moyenne_tri[:n])
         df_rmse.append({"Fichier_NetCDF": ville_sel, "Mois": mois, "RMSE": val_rmse})
 
         start_idx_model += nb_heures
