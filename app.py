@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Nov 28 14:23:23 2025
-
-@author: saint-genesj
-"""
-
 import streamlit as st
 import pandas as pd
 import xarray as xr
@@ -14,20 +6,17 @@ import os
 import numpy as np
 import io
 
-st.title("Comparaison modèle CSV / Observations NetCDF par ville")
+st.title("Comparaison modèle CSV / Observations NetCDF")
 
 # -------- Paramètres --------
-base_folder = "netcdf_by_scenario"  # dossier contenant les fichiers NetCDF par ville
+base_folder = "netcdf_by_scenario"  # dossier contenant les fichiers NetCDF
 heures_par_mois = [744, 672, 744, 720, 744, 720, 744, 744, 720, 744, 720, 744]  # année non bissextile
 
 # -------- Liste des fichiers NetCDF --------
 nc_files = glob.glob(os.path.join(base_folder, "*.nc"))
-# Extraire uniquement le nom de la ville
-villes = [os.path.basename(f).split("_")[-1].replace(".nc","") for f in nc_files]
-
-# -------- Sélection ville --------
-ville_sel = st.selectbox("Choisir la ville pour la comparaison :", villes)
-nc_file_sel = [f for f in nc_files if ville_sel in f][0]
+# Pour simplifier, on affiche le nom du fichier complet dans la liste déroulante
+ville_sel = st.selectbox("Choisir le fichier NetCDF :", [os.path.basename(f) for f in nc_files])
+nc_file_sel = os.path.join(base_folder, ville_sel)
 
 # -------- Upload CSV modèle --------
 uploaded = st.file_uploader("Dépose ton fichier CSV modèle (colonne unique T) :", type=["csv"])
@@ -70,7 +59,7 @@ if uploaded:
 
         val_rmse = rmse(obs_mois, mod_mois)
         resultats.append({
-            "Ville": ville_sel,
+            "Fichier_NetCDF": ville_sel,
             "Mois": mois,
             "RMSE": val_rmse
         })
@@ -80,7 +69,7 @@ if uploaded:
     st.subheader("RMSE mensuel")
     st.dataframe(df_rmse)
 
-    # -------- Nombre d'heures/jours au-dessus ou en dessous d'un seuil --------
+    # -------- Nombre d'heures au-dessus ou en dessous des seuils --------
     tmax_thresholds_list = [float(x.strip()) for x in tmax_thresholds.split(",")]
 
     df_stats = pd.DataFrame({
