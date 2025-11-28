@@ -5,7 +5,7 @@ import glob
 import os
 import numpy as np
 
-st.title("Comparaison modèle / Observations sur 10 ans (2010-2019)")
+st.title("Comparaison modèle / Observations sur 10 ans (01/01/2010 - 31/12/2019)")
 
 # -------- Paramètres --------
 base_folder = "obs"  # dossier contenant les fichiers NetCDF
@@ -75,7 +75,7 @@ if uploaded:
         obs_moyenne = np.mean(obs_mois_trimmed, axis=0)
 
         val_rmse = rmse(mod_sorted[:min_len], obs_moyenne)
-        results_rmse.append({"Mois": mois, "RMSE_percentiles": val_rmse})
+        results_rmse.append({"Mois": mois, "RMSE_percentiles": round(val_rmse, 2)})
 
         start_idx_model += nb_heures
 
@@ -95,16 +95,16 @@ if uploaded:
         # Heures supérieures
         for seuil in t_sup_thresholds_list:
             heures_obs = np.sum(obs_mois_10ans > seuil, axis=1)  # sum par année
-            nb_heures_obs_moy = np.mean(heures_obs)
+            nb_heures_obs_moy = np.mean(heures_obs)  # moyenne sur 10 ans
             nb_heures_mod = np.sum(mod_mois > seuil)
             ecart = nb_heures_obs_moy - nb_heures_mod
             stats.append({
                 "Mois": mois,
                 "Seuil": seuil,
                 "Type": "Supérieur",
-                "Nb_heures_obs_moy": nb_heures_obs_moy,
-                "Nb_heures_mod": nb_heures_mod,
-                "Ecart_obs_mod": ecart
+                "Nb_heures_obs_moy": round(nb_heures_obs_moy,2),
+                "Nb_heures_mod": round(nb_heures_mod,2),
+                "Ecart_obs_mod": round(ecart,2)
             })
 
         # Heures inférieures
@@ -117,9 +117,9 @@ if uploaded:
                 "Mois": mois,
                 "Seuil": seuil,
                 "Type": "Inférieur",
-                "Nb_heures_obs_moy": nb_heures_obs_moy,
-                "Nb_heures_mod": nb_heures_mod,
-                "Ecart_obs_mod": ecart
+                "Nb_heures_obs_moy": round(nb_heures_obs_moy,2),
+                "Nb_heures_mod": round(nb_heures_mod,2),
+                "Ecart_obs_mod": round(ecart,2)
             })
 
     df_stats = pd.DataFrame(stats)
@@ -133,7 +133,7 @@ if uploaded:
     st.download_button("Télécharger stats heures", "Heures_seuils.csv", "text/csv")
 
     # -------- Graphiques CDF et tableaux percentiles --------
-    st.subheader("Fonctions de répartition mensuelles (CDF) et Percentiles")
+    st.subheader("Fonctions de répartition mensuelles (CDF)")
 
     df_percentiles_all = []
 
@@ -149,7 +149,7 @@ if uploaded:
         df_cdf = pd.DataFrame({
             "Obs": obs_percentiles_100,
             "Mod": mod_percentiles_100
-        })
+        }).round(2)
         st.write(f"Mois {mois} - Fonction de répartition")
         st.line_chart(df_cdf)
 
@@ -160,14 +160,9 @@ if uploaded:
             "Percentile": [f"P{p}" for p in percentiles_list],
             "Obs_10ans": obs_p,
             "Mod": mod_p
-        })
-        df_p = df_p.round(2)  # <--- arrondi toutes les valeurs à 2 décimales
+        }).round(2)
         st.write(f"Mois {mois} - Percentiles")
         st.dataframe(df_p)
-
-        # Tableau bilan
-        df_bilan_pivot = df_bilan_pivot.round(2)  # <--- arrondi toutes les valeurs du bilan
-        st.dataframe(df_bilan_pivot.style.applymap(color_map))
 
         # Stockage pour tableau bilan
         for i, p in enumerate(percentiles_list):
@@ -180,24 +175,18 @@ if uploaded:
 
     # -------- Tableau bilan (plus chaud / plus froid) --------
     st.subheader("Bilan modèle vs Observations (chaud/froid)")
-    df_bilan = pd.DataFrame(df_percentiles_all)
-    # Création d'une colonne écart
+    df_bilan = pd.DataFrame(df_percentiles_all).round(2)
+
     df_bilan["Ecart"] = df_bilan["Mod"] - df_bilan["Obs_10ans"]
 
-    # Pivot pour avoir Mois x Percentile
-    df_bilan_pivot = df_bilan.pivot(index="Percentile", columns="Mois", values="Ecart")
+    df_bilan_pivot = df_bilan.pivot(index="Percentile", columns="Mois", values="Ecart").round(2)
 
-    # Coloration: bleu (froid), rouge (chaud)
     def color_map(val):
         if pd.isna(val):
             return ""
-        # Gradient simple
         if val < 0:
             return f"background-color: rgba(0,0,255,{min(abs(val)/5,1)})"
         else:
             return f"background-color: rgba(255,0,0,{min(val/5,1)})"
 
     st.dataframe(df_bilan_pivot.style.applymap(color_map))
-
-
-        
