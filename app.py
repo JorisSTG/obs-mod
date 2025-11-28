@@ -5,7 +5,7 @@ import glob
 import os
 import numpy as np
 
-st.title("Comparaison modèle CSV / Observations NetCDF sur 10 ans")
+st.title("Comparaison modèle / Observations sur 10 ans")
 
 # -------- Paramètres --------
 base_folder = "obs"  # dossier contenant les fichiers NetCDF
@@ -25,7 +25,7 @@ uploaded = st.file_uploader("Dépose ton fichier CSV modèle (colonne unique T) 
 
 # -------- Seuils --------
 t_sup_thresholds = st.text_input("Seuils Tmax sup (°C, séparés par des virgules)", "25,30,35")
-t_inf_thresholds = st.text_input("Seuils Tmin inf (°C, séparés par des virgules)", "0,5,10")
+t_inf_thresholds = st.text_input("Seuils Tmin inf (°C, séparés par des virgules)", "-5,0,5")
 
 if uploaded:
     # Lecture CSV modèle
