@@ -31,19 +31,16 @@ if uploaded:
     # Lecture du CSV modèle
     model_values = pd.read_csv(uploaded, header=0).iloc[:, 0].values
 
-    # Lecture NetCDF sélectionné
-    ds_obs = xr.open_dataset(nc_file_sel)
+    # Lecture NetCDF sélectionné avec décodage du temps
+    ds_obs = xr.open_dataset(nc_file_sel, decode_times=True)
     if "T" not in ds_obs:
         st.error("Le NetCDF n'a pas de variable 'T'")
         st.stop()
-    obs_values = ds_obs["T"].values  # dimensions : (time,)
-    time_obs = ds_obs["T"].coords["time"].values
 
-    # Convertir en DataFrame avec année et mois
-    df_obs = pd.DataFrame({
-        "T": obs_values,
-        "time": pd.to_datetime(time_obs, unit='h', origin=pd.Timestamp("2010-01-01"))
-    })
+    # Conversion en DataFrame avec datetime
+    obs_series = ds_obs["T"].to_series()  # index = datetime
+    df_obs = obs_series.reset_index()
+    df_obs.rename(columns={"T": "T", "time": "time"}, inplace=True)
     df_obs["year"] = df_obs["time"].dt.year
     df_obs["month"] = df_obs["time"].dt.month
 
@@ -78,7 +75,7 @@ if uploaded:
     st.subheader("RMSE mensuel")
     st.dataframe(df_rmse)
 
-    # -------- Nombre d'heures au-dessus d'un seuil --------
+    # -------- Nombre moyen d'heures au-dessus d'un seuil --------
     t_thresholds_list = [float(x.strip()) for x in t_thresholds.split(",")]
     df_stats = []
     for seuil in t_thresholds_list:
