@@ -47,52 +47,70 @@ if uploaded:
     # Supprimer les 29 février
     df_obs = df_obs[~((df_obs["month"] == 2) & (df_obs["day"] == 29))]
 
-    # -------- Calcul percentiles et RMSE --------
+    # -------- RMSE sur percentiles --------
     def rmse(a, b):
         return np.sqrt(np.nanmean((a - b) ** 2))
 
-    results = []
-
+    results_rmse = []
     start_idx_model = 0
+    obs_mois_all = []
+
     for mois, nb_heures in enumerate(heures_par_mois, start=1):
-        # Extraction des valeurs modèle pour ce mois
+        # Modèle pour ce mois
         mod_mois = model_values[start_idx_model:start_idx_model + nb_heures]
         mod_sorted = np.sort(mod_mois)
 
-        # Extraction des valeurs observées pour ce mois sur 10 ans
+        # Observations pour ce mois sur 10 ans
         obs_mois_10ans = []
         for year in sorted(df_obs["year"].unique()):
             vals = df_obs[(df_obs["year"] == year) & (df_obs["month"] == mois)]["T"].values
             obs_mois_10ans.append(np.sort(vals))
-        
-        # Alignement sur la longueur minimale
+
+        # Moyenne sur 10 ans
         min_len = min(len(mod_sorted), min(len(arr) for arr in obs_mois_10ans))
         obs_mois_trimmed = np.array([arr[:min_len] for arr in obs_mois_10ans])
         obs_moyenne = np.mean(obs_mois_trimmed, axis=0)
 
         val_rmse = rmse(mod_sorted[:min_len], obs_moyenne)
-        results.append({"Mois": mois, "RMSE_percentiles": val_rmse})
+        results_rmse.append({"Mois": mois, "RMSE_percentiles": val_rmse})
+
+        obs_mois_all.append(obs_mois_trimmed)
 
         start_idx_model += nb_heures
 
-    df_rmse = pd.DataFrame(results)
+    df_rmse = pd.DataFrame(results_rmse)
     st.subheader("RMSE sur les percentiles mensuels")
     st.dataframe(df_rmse)
 
-    # -------- Nombre moyen d'heures au-dessus d'un seuil --------
+    # -------- Nombre moyen d'heures au-dessus d'un seuil et écart obs-mod --------
     t_thresholds_list = [float(x.strip()) for x in t_thresholds.split(",")]
     stats = []
 
-    for seuil in t_thresholds_list:
-        for mois in range(1, 13):
-            heures_mois = []
-            for year in sorted(df_obs["year"].unique()):
-                vals = df_obs[(df_obs["year"] == year) & (df_obs["month"] == mois)]["T"].values
-                heures_mois.append(np.sum(vals > seuil))
-            stats.append({"Mois": mois, "Seuil": seuil, "Nb_heures_moy": np.mean(heures_mois)})
+    start_idx_model = 0
+    for mois, nb_heures in enumerate(heures_par_mois, start=1):
+        # Modèle pour ce mois
+        mod_mois = model_values[start_idx_model:start_idx_model + nb_heures]
+
+        # Observations pour ce mois sur 10 ans
+        obs_mois_10ans = obs_mois_all[mois-1]
+
+        for seuil in t_thresholds_list:
+            heures_obs = [np.sum(arr > seuil)/10 for arr in obs_mois_10ans]  # moyenne sur 10 ans
+            nb_heures_obs_moy = np.mean(heures_obs)
+            nb_heures_mod = np.sum(mod_mois > seuil)
+            ecart = nb_heures_obs_moy - nb_heures_mod
+            stats.append({
+                "Mois": mois,
+                "Seuil": seuil,
+                "Nb_heures_obs_moy": nb_heures_obs_moy,
+                "Nb_heures_mod": nb_heures_mod,
+                "Ecart_obs_mod": ecart
+            })
+
+        start_idx_model += nb_heures
 
     df_stats = pd.DataFrame(stats)
-    st.subheader("Nombre moyen d'heures au-dessus des seuils")
+    st.subheader("Nombre moyen d'heures > seuil et écart obs-mod")
     st.dataframe(df_stats)
 
     # -------- Export CSV --------
@@ -101,17 +119,3 @@ if uploaded:
 
     st.download_button("Télécharger RMSE", "RMSE_percentiles.csv", "text/csv")
     st.download_button("Télécharger stats heures", "Heures_au_dessus_seuils.csv", "text/csv")
-
-    # -------- Graphique CDF --------
-    import matplotlib.pyplot as plt
-    plt.figure(figsize=(8,5))
-    for mois in [1,2,3,4,5,6,7,8,9,10,11,12]:  # exemple: janvier, juillet, décembre
-        obs_concat = np.concatenate([arr for arr in obs_mois_10ans])
-        obs_sorted = np.sort(obs_concat)
-        mod_sorted_month = np.sort(model_values[sum(heures_par_mois[:mois-1]):sum(heures_par_mois[:mois])])
-        plt.plot(obs_sorted, np.linspace(0,1,len(obs_sorted)), label=f"Obs mois {mois}")
-        plt.plot(mod_sorted_month, np.linspace(0,1,len(mod_sorted_month)), '--', label=f"Modèle mois {mois}")
-    plt.xlabel("Température")
-    plt.ylabel("CDF")
-    plt.legend()
-    st.pyplot(plt)
