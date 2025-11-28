@@ -5,7 +5,7 @@ import glob
 import os
 import numpy as np
 
-st.title("Comparaison modèle / Observations sur 10 ans")
+st.title("Comparaison modèle / Observations sur 10 ans (01/01/2010 - 31/12/2019)")
 
 # -------- Paramètres --------
 base_folder = "obs"  # dossier contenant les fichiers NetCDF
