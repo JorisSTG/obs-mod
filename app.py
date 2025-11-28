@@ -41,6 +41,7 @@ if uploaded:
     obs_series = ds_obs["T"].to_series()  # index = datetime
     df_obs = obs_series.reset_index()
     df_obs.rename(columns={"T": "T", "time": "time"}, inplace=True)
+    df_obs["year"] = df_obs["time"].dt.year
     df_obs["month"] = df_obs["time"].dt.month
 
     # -------- RMSE mensuel avec tri sur 10 ans --------
@@ -55,15 +56,20 @@ if uploaded:
         mod_sorted = np.sort(mod_mois)
 
         # Extraire toutes les valeurs observées du mois sur 10 ans
-        obs_mois_all = df_obs[df_obs["month"] == mois]["T"].values
-        # Reshape en 10 années x nb_heures/mois
-        obs_mois_all = obs_mois_all.reshape((10, -1))
-        # Tri pour chaque année
-        obs_mois_all_sorted = np.sort(obs_mois_all, axis=1)
-        # Moyenne sur 10 ans position par position
-        obs_moyenne_tri = np.mean(obs_mois_all_sorted, axis=0)
+        obs_mois_10ans = []
+        for year in df_obs["year"].unique():
+            obs_year_mois = df_obs[(df_obs["year"] == year) & (df_obs["month"] == mois)]["T"].values
+            if len(obs_year_mois) > 0:
+                obs_mois_10ans.append(np.sort(obs_year_mois))
 
-        val_rmse = rmse(mod_sorted, obs_moyenne_tri)
+        # Trouver la longueur minimale pour aligner toutes les années
+        min_len = min(len(arr) for arr in obs_mois_10ans)
+        obs_mois_10ans_trim = np.array([arr[:min_len] for arr in obs_mois_10ans])
+
+        # Moyenne sur 10 ans
+        obs_moyenne_tri = np.mean(obs_mois_10ans_trim, axis=0)
+
+        val_rmse = rmse(mod_sorted[:min_len], obs_moyenne_tri)
         df_rmse.append({"Fichier_NetCDF": ville_sel, "Mois": mois, "RMSE": val_rmse})
 
         start_idx_model += nb_heures
@@ -77,11 +83,11 @@ if uploaded:
     df_stats = []
     for seuil in t_thresholds_list:
         for mois in range(1, 13):
-            obs_mois_all = df_obs[df_obs["month"] == mois]["T"].values
-            obs_mois_all = obs_mois_all.reshape((10, -1))
-            # Compter heures > seuil pour chaque année
-            nb_heures_par_an = np.sum(obs_mois_all > seuil, axis=1)
-            nb_heures_moy = np.mean(nb_heures_par_an)
+            heures_par_mois = []
+            for year in df_obs["year"].unique():
+                obs_year_mois = df_obs[(df_obs["year"] == year) & (df_obs["month"] == mois)]["T"].values
+                heures_par_mois.append(np.sum(obs_year_mois > seuil))
+            nb_heures_moy = np.mean(heures_par_mois)
             df_stats.append({"Fichier_NetCDF": ville_sel, "Mois": mois, "Seuil": seuil, "Nb_heures_moy": nb_heures_moy})
 
     df_stats = pd.DataFrame(df_stats)
