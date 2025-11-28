@@ -22,7 +22,7 @@ ville_sel = st.selectbox("Choisir le fichier NetCDF :", [os.path.basename(f) for
 nc_file_sel = os.path.join(base_folder, ville_sel)
 
 # -------- Upload CSV modèle --------
-uploaded = st.file_uploader("Dépose ton fichier CSV modèle (colonne unique T) :", type=["csv"])
+uploaded = st.file_uploader("Déposer le fichier CSV du modèle (colonne T°C uniquement, 8760 valeurs attendues) :", type=["csv"])
 
 # -------- Seuils --------
 t_sup_thresholds = st.text_input("Seuils Tmax sup (°C, séparés par des virgules)", "25,30,35")
