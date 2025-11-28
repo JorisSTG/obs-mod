@@ -161,8 +161,13 @@ if uploaded:
             "Obs_10ans": obs_p,
             "Mod": mod_p
         })
+        df_p = df_p.round(2)  # <--- arrondi toutes les valeurs à 2 décimales
         st.write(f"Mois {mois} - Percentiles")
         st.dataframe(df_p)
+
+        # Tableau bilan
+        df_bilan_pivot = df_bilan_pivot.round(2)  # <--- arrondi toutes les valeurs du bilan
+        st.dataframe(df_bilan_pivot.style.applymap(color_map))
 
         # Stockage pour tableau bilan
         for i, p in enumerate(percentiles_list):
