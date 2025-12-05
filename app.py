@@ -75,23 +75,35 @@ for dossier in dossiers:
             path = os.path.join(dossier, f)
             ds = xr.open_dataset(path, decode_times=True)
             if "T2m" in ds:
+                # convertir les années en int
                 years = ds["time"].dt.year.values
+                years = [int(y) for y in years]
                 for y in years:
                     annee_to_file[y] = (dossier, f)
             ds.close()
 
+# trier les années uniques
 annees_dispo = sorted(annee_to_file.keys())
 
 # -------------------------------------------------------------------
-# 2) Choix de l'année
+# Menu selectbox pour choisir l'année
 # -------------------------------------------------------------------
 annee_sel = st.selectbox("Choisir l'année :", annees_dispo)
 
 # -------------------------------------------------------------------
-# 3) Trouver le fichier correspondant à l'année choisie
+# Sécurité : vérifier que l'année existe
 # -------------------------------------------------------------------
+if annee_sel not in annee_to_file:
+    st.error(f"⚠️ L'année {annee_sel} n'a pas été trouvée dans les fichiers.")
+    st.stop()
+
 dossier_sel, fichier_sel = annee_to_file[annee_sel]
 nc_path = os.path.join(dossier_sel, fichier_sel)
+
+# -------------------------------------------------------------------
+# Suite du code inchangé
+# -------------------------------------------------------------------
+
 
 # -------------------------------------------------------------------
 # 4) Choix de la ville (déduit automatiquement du nom du fichier)
