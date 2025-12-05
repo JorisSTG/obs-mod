@@ -1137,32 +1137,7 @@ if uploaded:
         .background_gradient(cmap="bwr", vmin=vminT, vmax=vmaxT)
         .format("{:.2f}")
     )
-    # -------- Section multi-scénarios pour la ville --------
-    st.subheader(f"Comparaison multi-scénarios pour {file_sel}")
-
-    
-    df_percentiles_scenarios = []
-    for scenario in scenarios:
-        nc_file = os.path.join(base_folder, scenario, f"{file_sel}.nc")
-        ds = xr.open_dataset(nc_file, decode_times=True)
-        temps = ds["T2m"].to_series().values
-        start_idx = 0
-        for mois_num, nb_heures in enumerate(heures_par_mois, start=1):
-            mois = mois_noms[mois_num]
-            obs_mois = temps[start_idx:start_idx + nb_heures]
-            obs_p = np.percentile(obs_mois, percentiles_list)
-            for i, p in enumerate(percentiles_list):
-                df_percentiles_scenarios.append({
-                    "Scénario": scenario,
-                    "Mois": mois,
-                    "Percentile": f"P{p}",
-                    "Valeur": round(obs_p[i],2)
-                })
-            start_idx += nb_heures
-    
-    df_scenarios = pd.DataFrame(df_percentiles_scenarios)
-    
-
+   
     # ---- Stockage des figures dans session_state ----
     st.session_state["fig_hist_year"] = fig_hist_year
     st.session_state["fig_hist_diff"] = fig_hist_diff
