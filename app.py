@@ -65,9 +65,9 @@ if annee_sel == "Typique":
     dossier_sel = "typique"
     annee_sel = 9999  # Placeholder pour typique
 elif annee_sel in range(2000, 2010):
-    dossier_sel = "obs2000_2009"
+    dossier_sel = "obs_2000_2009"
 elif annee_sel in range(2010, 2020):
-    dossier_sel = "obs"
+    dossier_sel = "obs_2010_2019"
 else:
     st.error("Sélection invalide.")
     st.stop()
