@@ -150,10 +150,10 @@ if uploaded:
             return 100.0
     
         # --- bornage ---
-        diff_moyenne = min(diff_moyenne, 2 * scale)
+        diff_moyenne = min(diff_moyenne, 3 * scale)
     
         # --- score linéaire ---
-        score = 100 * (1 - diff_moyenne / (2 * scale))
+        score = 100 * (1 - diff_moyenne / (3 * scale))
     
         return round(score, 2)
 
