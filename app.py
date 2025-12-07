@@ -506,14 +506,7 @@ if uploaded:
     # Comptage annuel pour chaque bin de température
     obs_counts_annee = count_hours_in_bins(obs_annee, bins)
     mod_counts_annee = count_hours_in_bins(mod_annee, bins)
-    
-    # Calcul RMSE sur les comptes
-    def rmse_counts(a_counts, b_counts):
-        m = min(len(a_counts), len(b_counts))
-        return np.sqrt(np.nanmean((np.array(a_counts[:m]) - np.array(b_counts[:m]))**2))
-    
-    rmse_annee = rmse_counts(obs_counts_annee, mod_counts_annee)
-    
+
     # Calcul de la précision : 100% si comptages identiques, 0% si pas de recouvrement
     total_hours = len(obs_annee) + len(mod_annee)  # idéalement identique, = 2 * 8760
     hours_error = np.sum(np.abs(np.array(obs_counts_annee) - np.array(mod_counts_annee)))
@@ -521,7 +514,6 @@ if uploaded:
     
     # Affichage dans Streamlit
     st.subheader("Précision globale annuelle — répartition des durées par température")
-    st.write(f"RMSE (comptages par bin) : {rmse_annee:.2f}")
     st.write(f"Précision annuelle (%) : {precision_annee:.2f}")
 
     # ============================
