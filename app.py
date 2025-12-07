@@ -136,12 +136,20 @@ if uploaded:
     # -------- Lecture CSV modèle --------
     model_values = pd.read_csv(uploaded, header=0).iloc[:, 0].values
 
+    def count_hours_in_bins(temp_hourly, bins):
+        counts, _ = np.histogram(temp_hourly, bins=bins)
+        return counts
+
     # -------- RMSE --------
     def rmse(a, b):
         min_len = min(len(a), len(b))
         a_sorted = np.sort(a[:min_len])
         b_sorted = np.sort(b[:min_len])
         return np.sqrt(np.nanmean((a_sorted - b_sorted) ** 2))
+
+    def rmse_hours(obs_counts, mod_counts):
+        min_len = min(len(obs_counts), len(mod_counts))
+        return np.sqrt(np.nanmean((np.array(obs_counts[:min_len]) - np.array(mod_counts[:min_len]))**2))
 
     # -------- Nouvelle fonction : indice de recouvrement --------
     def precision_overlap(a, b, bin_width=1.0):
@@ -171,6 +179,9 @@ if uploaded:
     obs_mois_all = []
     start_idx_model = 0  # utile uniquement pour découper le modèle
     
+    # Bins fixes pour tous les mois → meilleure cohérence RMSE_hours
+    bins = np.arange(-30, 60 + 1, 1)  # de -30°C à +60°C, pas de 1°C
+    
     for mois_num, nb_heures in enumerate(heures_par_mois, start=1):
     
         mois = mois_noms[mois_num]
@@ -183,29 +194,42 @@ if uploaded:
         # -------- Modèle : découpe par bloc d'heures --------
         mod_mois = model_values[start_idx_model:start_idx_model + nb_heures]
     
-        # -------- Calculs --------
+        # -------- RMSE classique --------
         val_rmse = rmse(mod_mois, obs_mois_vals)
+    
+        # -------- Comptage horaire par intervalle --------
+        obs_counts = count_hours_in_bins(obs_mois_vals, bins)
+        mod_counts = count_hours_in_bins(mod_mois, bins)
+    
+        # -------- RMSE_hours --------
+        val_rmse_h = rmse_hours(obs_counts, mod_counts)
+    
+        # -------- Indice de recouvrement (distribution entière) --------
         pct_precision = precision_overlap(mod_mois, obs_mois_vals)
     
+        # -------- Stockage --------
         results_rmse.append({
             "Mois": mois,
             "RMSE (°C)": round(val_rmse, 2),
-            "Précision percentile (%)": pct_precision
+            "RMSE_hours": round(val_rmse_h, 2),
+            "Précision (%)": pct_precision
         })
     
         # -------- Avancer dans le modèle --------
         start_idx_model += nb_heures
-
+    
     # -------- DataFrame final --------
     df_rmse = pd.DataFrame(results_rmse)
+    
     df_rmse_styled = (
         df_rmse.style
-        .background_gradient(subset=["Précision percentile (%)"], cmap="RdYlGn", vmin=vminP, vmax=vmaxP, axis=None)
-        .format({"Précision percentile (%)": "{:.2f}", "RMSE (°C)": "{:.2f}"})
+        .background_gradient(subset=["Précision (%)"], cmap="RdYlGn", vmin=0, vmax=100, axis=None)
+        .format({"Précision (%)": "{:.2f}", "RMSE (°C)": "{:.2f}", "RMSE_hours": "{:.2f}"})
     )
-
-    st.subheader("Précision du modèle : RMSE et précision selon la répartition des températures")
+    
+    st.subheader("Précision du modèle : RMSE (°C), RMSE_hours et indice de recouvrement (%)")
     st.dataframe(df_rmse_styled, hide_index=True)
+
 
     # -------- Précision globale annuelle --------
     model_annee = model_values[:sum(heures_par_mois)]        # toutes les heures de l'année
@@ -297,9 +321,6 @@ if uploaded:
     bin_edges = bins = np.arange(-5, 46, 1)  # bornes des bins
     bin_labels = bin_edges[:-1].astype(int)  # labels = début de l'intervalle
     
-    def count_hours_in_bins(temp_hourly, bins):
-        counts, _ = np.histogram(temp_hourly, bins=bins)
-        return counts
     
     for mois_num in range(1, 13):
         mois = mois_noms[mois_num]
@@ -346,10 +367,6 @@ if uploaded:
     # Bins correspondant à [X, X+1[
     bin_edges = np.arange(-5, 46, 1)
     bin_labels = bin_edges[:-1].astype(int)
-    
-    def count_hours_in_bins(temp_hourly, bins):
-        counts, _ = np.histogram(temp_hourly, bins=bins)
-        return counts
     
     # -------- Regroupement ANNUEL --------
     # Observations : concaténer tous les mois
@@ -458,63 +475,6 @@ if uploaded:
     for p in st.session_state["resume_hist"]:
         st.write("- " + p)
 
-
-    # -------- Précision par créneau horaire --------
-    results_temp = []
-    def rmse_hours(obs_counts, mod_counts):
-        min_len = min(len(obs_counts), len(mod_counts))
-        return np.sqrt(np.nanmean((np.array(obs_counts[:min_len]) - np.array(mod_counts[:min_len]))**2))
-
-    for mois_num in range(1, 13):
-        mois = mois_noms[mois_num]
-        obs_hourly = obs_mois_all[mois_num-1]
-        idx0 = sum(heures_par_mois[:mois_num-1])
-        idx1 = sum(heures_par_mois[:mois_num])
-        mod_hourly = model_values[idx0:idx1]
-        obs_counts = count_hours_in_bins(obs_hourly, bins)
-        mod_counts = count_hours_in_bins(mod_hourly, bins)
-        total_hours = 2*heures_par_mois[mois_num-1]
-        hours_error = sum(abs(np.array(obs_counts) - np.array(mod_counts)))
-        pct_precision = round(100 * (1 - hours_error / total_hours), 2)
-        val_rmse = rmse_hours(obs_counts, mod_counts)
-        results_temp.append({
-            "Mois": mois,
-            "RMSE (heure)": round(val_rmse,2),
-            "Précision (%)": pct_precision
-        })
-
-    df_temp_precision = pd.DataFrame(results_temp)
-    df_temp_precision_styled = df_temp_precision.style \
-        .background_gradient(subset=["Précision (%)"], cmap="RdYlGn", vmin=vminP, vmax=vmaxP, axis=None) \
-        .format({"Précision (%)": "{:.2f}", "RMSE (heure)": "{:.2f}"})
-
-    st.subheader(f"Précision du modèle sur la répartition des durées des plages de température (Observations {file_sel})")
-    st.markdown(
-        """
-        Le RMSE correspond à la moyenne de l’écart absolu entre les valeurs du modèle et celles de la Observations pour chaque intervalle de température.
-        La précision est calculée à partir de la différence totale d’heures dans chaque intervalle 
-        """,
-        unsafe_allow_html=True
-    )
-    st.dataframe(df_temp_precision_styled, hide_index=True)
-
-    # -------- Précision globale annuelle (répartition des durées par plage de T°C) --------
-    # Concaténation des séries horaires annuelles
-    obs_annee = np.concatenate(obs_mois_all)
-    mod_annee = model_values[:sum(heures_par_mois)]
-    
-    # Comptage annuel pour chaque bin de température
-    obs_counts_annee = count_hours_in_bins(obs_annee, bins)
-    mod_counts_annee = count_hours_in_bins(mod_annee, bins)
-
-    # Calcul de la précision : 100% si comptages identiques, 0% si pas de recouvrement
-    total_hours = len(obs_annee) + len(mod_annee)  # idéalement identique, = 2 * 8760
-    hours_error = np.sum(np.abs(np.array(obs_counts_annee) - np.array(mod_counts_annee)))
-    precision_annee = round(100 * (1 - hours_error / total_hours), 2)
-    
-    # Affichage dans Streamlit
-    st.subheader("Précision globale annuelle — répartition des durées par température")
-    st.write(f"Précision annuelle (%) : {precision_annee:.2f}")
 
     # ============================
     #   COURBES Tn / Tmoy / Tx
