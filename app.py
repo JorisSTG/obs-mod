@@ -204,7 +204,7 @@ if uploaded:
         .format({"Précision percentile (%)": "{:.2f}", "RMSE (°C)": "{:.2f}"})
     )
 
-    st.subheader("Précision du modèle : RMSE et précision via écarts des percentiles")
+    st.subheader("Précision du modèle : RMSE et précision selon la répartition des températures")
     st.dataframe(df_rmse_styled, hide_index=True)
 
     # -------- Précision globale annuelle --------
@@ -417,12 +417,12 @@ if uploaded:
         """
         La couleur de la différence est définie ainsi :
 
-        Barres jaunes : le modèle compte davantage d’heures que la Observations dans cette plage de température.
+        Barres jaunes : le modèle compte davantage d’heures que les données d'bservations dans cette plage de température.
 
-        Barres blanches : la Observations compte davantage d’heures que le modèle dans cette plage de température.
+        Barres blanches : les données d'bservations compte davantage d’heures que le modèle dans cette plage de température.
 
-        La conclusion dépend donc de l’endroit où se situe cette différence. Une analyse doit être réalisée manuellement : par exemple, si la Observations présente plus d’heures dans les plages « froides », cela signifie qu’elle est globalement plus froide que le modèle.
-        Comme les deux séries possèdent le même nombre total d’heures, un excès d’heures froides dans la Observations implique mécaniquement un excès d’heures chaudes dans le modèle (et inversement).
+        La conclusion dépend donc de l’endroit où se situe cette différence. Une analyse doit être réalisée manuellement : par exemple, si l'observation présente plus d’heures dans les plages « froides », cela signifie qu’elle est globalement plus froide que le modèle.
+        Comme les deux séries possèdent le même nombre total d’heures, un excès d’heures froides dans la série d'bservations implique mécaniquement un excès d’heures chaudes dans le modèle (et inversement).
         """,
         unsafe_allow_html=True
     )
@@ -437,18 +437,18 @@ if uploaded:
     heures_modele_chaud = np.sum(mod_hourly_annual > tx_seuil_chaud)
     
     if heures_Observations_chaud > heures_modele_chaud:
-        phrase_tx_chaud = f"Observations a plus d'heures avec une T>{tx_seuil_chaud}°C ({heures_Observations_chaud}) que le modèle ({heures_modele_chaud})."
+        phrase_tx_chaud = f"Les observations ont plus d'heures avec une T>{tx_seuil_chaud}°C ({heures_Observations_chaud}) que le modèle ({heures_modele_chaud})."
     else:
-        phrase_tx_chaud = f"Le modèle a plus d'heures avec une T>{tx_seuil_chaud}°C ({heures_modele_chaud}) que Observations ({heures_Observations_chaud})."
+        phrase_tx_chaud = f"Le modèle a plus d'heures avec une T>{tx_seuil_chaud}°C ({heures_modele_chaud}) que les observations ({heures_Observations_chaud})."
 
     tn_seuil_froid = 5
     heures_Observations_froid = np.sum(obs_hourly_annual < tn_seuil_froid)
     heures_modele_froid = np.sum(mod_hourly_annual < tn_seuil_froid)
     
     if heures_Observations_froid > heures_modele_chaud:
-        phrase_tn_froid = f"Le modèle a plus d'heures avec une T<{tn_seuil_froid}°C ({heures_modele_froid}) que Observations ({heures_Observations_froid})."
+        phrase_tn_froid = f"Le modèle a plus d'heures avec une T<{tn_seuil_froid}°C ({heures_modele_froid}) que les observations ({heures_Observations_froid})."
     else:
-        phrase_tn_froid = f"Observations a plus d'heures avec une T<{tn_seuil_froid}°C ({heures_Observations_froid}) que le modèle ({heures_modele_froid})."
+        phrase_tn_froid = f"Les observations ont plus d'heures avec une T<{tn_seuil_froid}°C ({heures_Observations_froid}) que le modèle ({heures_modele_froid})."
 
     # Stocker dans st.session_state pour la page Résumé
     st.session_state["resume_hist"] = [phrase_tx_chaud, phrase_tn_froid]
@@ -497,6 +497,32 @@ if uploaded:
         unsafe_allow_html=True
     )
     st.dataframe(df_temp_precision_styled, hide_index=True)
+
+    # -------- Précision globale annuelle (répartition des durées par plage de T°C) --------
+    # Concaténation des séries horaires annuelles
+    obs_annee = np.concatenate(obs_mois_all)
+    mod_annee = model_values[:sum(heures_par_mois)]
+    
+    # Comptage annuel pour chaque bin de température
+    obs_counts_annee = count_hours_in_bins(obs_annee, bins)
+    mod_counts_annee = count_hours_in_bins(mod_annee, bins)
+    
+    # Calcul RMSE sur les comptes
+    def rmse_counts(a_counts, b_counts):
+        m = min(len(a_counts), len(b_counts))
+        return np.sqrt(np.nanmean((np.array(a_counts[:m]) - np.array(b_counts[:m]))**2))
+    
+    rmse_annee = rmse_counts(obs_counts_annee, mod_counts_annee)
+    
+    # Calcul de la précision : 100% si comptages identiques, 0% si pas de recouvrement
+    total_hours = len(obs_annee) + len(mod_annee)  # idéalement identique, = 2 * 8760
+    hours_error = np.sum(np.abs(np.array(obs_counts_annee) - np.array(mod_counts_annee)))
+    precision_annee = round(100 * (1 - hours_error / total_hours), 2)
+    
+    # Affichage dans Streamlit
+    st.subheader("Précision globale annuelle — répartition des durées par température")
+    st.write(f"RMSE (comptages par bin) : {rmse_annee:.2f}")
+    st.write(f"Précision annuelle (%) : {precision_annee:.2f}")
 
     # ============================
     #   COURBES Tn / Tmoy / Tx
