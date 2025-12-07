@@ -23,6 +23,7 @@ st.title("Comparaison : Modèle / Observations")
 st.markdown(
     """
     L’objectif de cette application est d’évaluer la précision de données météorologiques en les comparant à des données de référence.
+    La température de l'air au niveau du sol est l'unique paramètre utilisé afin de comparer le **modèle**.
     """,
     unsafe_allow_html=True
 )
@@ -641,8 +642,8 @@ if uploaded:
         return daily_min, daily_mean, daily_max
     
     # percentiles pour les petits tableaux
-    pct_table = percentiles_list  # utilise la liste déjà définie en haut (ex: [10,25,50,75,90])
-    pct_for_cdf = np.linspace(0, 100, 100)  # pour tracer les CDF
+    pct_table = percentiles_list  
+    pct_for_cdf = np.linspace(0, 100, 100) 
     
     Tx_jour_all = []
     Tn_jour_all = []
@@ -1093,7 +1094,7 @@ if uploaded:
     fig, ax = plt.subplots(figsize=(6,6))
     
     # Définir les couleurs selon qui est plus chaud
-    colors = ['lightgray' if obs > mod else 'goldenrod' for obs, mod in zip(P_obs, P_mod)]
+    colors = [couleur_Observations if obs > mod else couleur_modele for obs, mod in zip(P_obs, P_mod)]
     
     # Tracer les croix
     ax.scatter(P_obs, P_mod, color=colors, marker='x', s=50, label='Percentiles')
