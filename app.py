@@ -977,7 +977,7 @@ if uploaded:
     # --------------------------
     # Affichage tables Streamlit
     # --------------------------
-    st.subheader("DJU / DJC – Chauffage (somme journalière par mois)")
+    st.subheader("DJC – Chauffage (somme journalière par mois)")
     st.dataframe(df_DJC.round(2))  # Arrondi à 2 décimales
     
     st.subheader("DJF – Refroidissement (somme journalière par mois)")
@@ -1000,9 +1000,9 @@ if uploaded:
 
     for df, titre in zip([df_DJC, df_DJF], ["DJC", "DJF"]):
         fig, ax = plt.subplots(figsize=(14, 4))
-        ax.bar(df.index - 0.25, df["Observations"], width=0.5,
+        ax.bar(df.index - 0.25, df["Observations"], width=0.4,
                color=couleur_Observations, label="Observations")
-        ax.bar(df.index + 0.25, df["Modèle"], width=0.5,
+        ax.bar(df.index + 0.25, df["Modèle"], width=0.4,
                color=couleur_modele, label="Modèle")
     
         ax.set_xticks(df.index)
