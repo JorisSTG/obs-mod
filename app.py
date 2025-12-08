@@ -413,7 +413,7 @@ if uploaded:
     ax.set_title("Année entière - Durée en heures par seuil de température")
     ax.set_xlabel("Température (°C)")
     ax.set_ylabel("Durée en heure")
-    ax.legend()
+    ax.legend(fontsize='x-large')
     
     st.pyplot(fig)
     plt.close(fig)
@@ -437,7 +437,7 @@ if uploaded:
     ax.set_title("Année entière - Différence en heures par seuil de température")
     ax.set_xlabel("Température (°C)")
     ax.set_ylabel("Durée en heure")
-    ax.legend()
+    ax.legend(fontsize='x-large')
     fig_hist_diff = fig
     st.pyplot(fig)
     plt.close(fig)
@@ -446,9 +446,9 @@ if uploaded:
         """
         La couleur de la différence est définie ainsi :
 
-        Barres jaunes : le modèle compte davantage d’heures que les données d'bservations dans cette plage de température.
+        Barres jaunes : le modèle compte davantage d’heures que les données d'observations dans cette plage de température.
 
-        Barres blanches : les données d'bservations compte davantage d’heures que le modèle dans cette plage de température.
+        Barres blanches : les données d'boservations compte davantage d’heures que le modèle dans cette plage de température.
 
         La conclusion dépend donc de l’endroit où se situe cette différence. Une analyse doit être réalisée manuellement : par exemple, si l'observation présente plus d’heures dans les plages « froides », cela signifie qu’elle est globalement plus froide que le modèle.
         Comme les deux séries possèdent le même nombre total d’heures, un excès d’heures froides dans la série d'bservations implique mécaniquement un excès d’heures chaudes dans le modèle (et inversement).
@@ -496,7 +496,8 @@ if uploaded:
         """  
         - Les valeurs tracées représentent les températures minimales et maximales **absolues** du mois (c’est-à-dire P0 et P100)
         - De ce fait, les températures du mois ne dépassent jamais les bornes définies par Tn_mois et Tx_mois.
-        - La température moyenne (Tmoy_mois) correspond à la moyenne mensuelle calculée sur l’ensemble des pas de temps
+        - La température moyenne (Tmoy_mois) correspond à la moyenne mensuelle calculée sur l’ensemble des pas de temps. 
+        - **Tmoy est différente de Tm=(Tn+Tx)/2**
         """,
         unsafe_allow_html=True
     )
