@@ -267,7 +267,7 @@ if uploaded:
         <a href="https://www.researchgate.net/profile/Md-Haidar-Sharif/publication/220804172/figure/fig3/AS:295583899242509@1447484101456/Bhattacharyya-distance-surrounds-altogether-for-one-dimensional-example-of-twosomes-of.png"
         target="_blank">
         <img
-        src="https://www.researchgate.net/profile/Md-Haidar-Sharif/publication/220804172/figure/fig3/AS:295583899242509@1447484101456/Bhattacharyya-distance-surrounds-altogether-for-one-dimensional-example-of-twosomes-of.png" width="500">
+        src="https://www.researchgate.net/profile/Md-Haidar-Sharif/publication/220804172/figure/fig3/AS:295583899242509@1447484101456/Bhattacharyya-distance-surrounds-altogether-for-one-dimensional-example-of-twosomes-of.png" width="800">
         <a/>
         </div>
 
