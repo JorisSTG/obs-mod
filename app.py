@@ -252,8 +252,8 @@ if uploaded:
     st.subheader("")
 
     # -------- Seuils --------
-    t_sup_thresholds = st.text_input("Seuils Tmax supérieur (°C, séparés par des virgules)", "25/30/35")
-    t_inf_thresholds = st.text_input("Seuils Tmin inférieur (°C, séparés par des virgules)", "-5/0/5")
+    t_sup_thresholds = st.text_input("Seuils supérieurs (°C, séparer les seuils par des / )", "25/30/35")
+    t_inf_thresholds = st.text_input("Seuils inférieurs (°C, séparer les seuils par des / )", "-5/0/5")
     t_sup_thresholds_list = [int(float(x.strip())) for x in t_sup_thresholds.split("/")]
     t_inf_thresholds_list = [int(float(x.strip())) for x in t_inf_thresholds.split("/")]
     
@@ -322,10 +322,10 @@ if uploaded:
 
 
     # -------- Histogrammes par plage de température --------
-    st.subheader(f"Histogrammes horaire : Modèle et Observations {file_sel}")
+    st.subheader(f"Histogrammes horaire : Modèle et observations {file_sel}")
     st.markdown(
         """
-        La valeur de chaque barre est égal au total d'heure compris entre [ X°C , X+1°C [
+        La valeur de chaque barre est égale au total d'heure compris entre [ X°C , X+1°C [
         """,
         unsafe_allow_html=True
     )
@@ -362,7 +362,7 @@ if uploaded:
         ax.set_title(f"{mois} - Durée en heure par seuil de température")
         ax.set_xlabel("Température (°C)")
         ax.set_ylabel("Durée en heure")
-        ax.legend()
+        ax.legend(fontsize='x-large')
         st.pyplot(fig)
         plt.close(fig)
 
