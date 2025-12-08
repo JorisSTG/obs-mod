@@ -270,9 +270,11 @@ if uploaded:
         src="https://www.researchgate.net/profile/Md-Haidar-Sharif/publication/220804172/figure/fig3/AS:295583899242509@1447484101456/Bhattacharyya-distance-surrounds-altogether-for-one-dimensional-example-of-twosomes-of.png" width="500">
         <a/>
         </div>
+
         """,
         unsafe_allow_html=True
     )
+   
     st.subheader("")
 
     # -------- Seuils --------
