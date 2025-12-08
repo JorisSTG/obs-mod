@@ -673,6 +673,13 @@ if uploaded:
         daily_mean = arr.mean(axis=1)
         daily_max = arr.max(axis=1)
         return daily_min, daily_mean, daily_max
+
+    def count_days_in_bins(daily_values, bin_edges):
+        """
+        Retourne un tableau : nombre de jours dont la valeur tombe dans [X, X+1[ pour chaque X.
+        """
+        return np.histogram(daily_values, bins=bin_edges)[0]
+
     
     # percentiles pour les petits tableaux
     pct_table = percentiles_list  
@@ -685,6 +692,73 @@ if uploaded:
     Tx_jour_mod_all = []
     Tn_jour_mod_all = []
     Tm_jour_mod_all = []
+
+    # ---------------- Histogramme annuel Tn / Tx (Modèle vs Observations) ----------------
+    st.subheader(f"Histogramme annuel Tn / Tx : Modèle et Observations {file_sel}")
+    st.markdown(
+        """
+        La valeur de chaque barre correspond **au nombre de jours** dans lesquels la température
+        minimale ou maximale journalière est comprise dans l’intervalle **[X°C , X+1°C[**.
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # --- Définition des classes de température ---
+    bin_edges = np.arange(-10, 45, 1)  # Ajuste selon tes données
+    bin_labels = bin_edges[:-1].astype(int)
+    
+    # --- Concaténation annuelle ---
+    Tn_obs_annual = np.concatenate(Tn_jour_all)
+    Tx_obs_annual = np.concatenate(Tx_jour_all)
+    
+    Tn_mod_annual = np.concatenate(Tn_jour_mod_all)
+    Tx_mod_annual = np.concatenate(Tx_jour_mod_all)
+    
+    # --- Comptage dans les classes ---
+    obs_counts_Tn = count_days_in_bins(Tn_obs_annual, bin_edges)
+    mod_counts_Tn = count_days_in_bins(Tn_mod_annual, bin_edges)
+    
+    obs_counts_Tx = count_days_in_bins(Tx_obs_annual, bin_edges)
+    mod_counts_Tx = count_days_in_bins(Tx_mod_annual, bin_edges)
+    
+    # --- Préparer DataFrame ---
+    df_hist = pd.DataFrame({
+        "Temp_Num": bin_labels,
+        "Température": bin_labels.astype(str) + "°C",
+        "Obs_Tn": obs_counts_Tn,
+        "Mod_Tn": mod_counts_Tn,
+        "Obs_Tx": obs_counts_Tx,
+        "Mod_Tx": mod_counts_Tx
+    }).sort_values("Temp_Num")
+    
+    # ---------------- FIGURE Tn ----------------
+    fig, ax = plt.subplots(figsize=(15, 5))
+    ax.bar(df_hist["Temp_Num"] - 0.25, df_hist["Obs_Tn"], width=0.4,
+           label="Observations Tn", color=couleur_Observations)
+    ax.bar(df_hist["Temp_Num"] + 0.25, df_hist["Mod_Tn"], width=0.4,
+           label="Modèle Tn", color=couleur_modele)
+    
+    ax.set_title("Histogramme annuel – Nombre de jours par classe de Tn")
+    ax.set_xlabel("Température (°C)")
+    ax.set_ylabel("Nombre de jours")
+    ax.legend(fontsize='large')
+    st.pyplot(fig)
+    plt.close(fig)
+    
+    # ---------------- FIGURE Tx ----------------
+    fig, ax = plt.subplots(figsize=(15, 5))
+    ax.bar(df_hist["Temp_Num"] - 0.25, df_hist["Obs_Tx"], width=0.4,
+           label="Observations Tx", color=couleur_Observations)
+    ax.bar(df_hist["Temp_Num"] + 0.25, df_hist["Mod_Tx"], width=0.4,
+           label="Modèle Tx", color=couleur_modele)
+    
+    ax.set_title("Histogramme annuel – Nombre de jours par classe de Tx")
+    ax.set_xlabel("Température (°C)")
+    ax.set_ylabel("Nombre de jours")
+    ax.legend(fontsize='large')
+    st.pyplot(fig)
+    plt.close(fig)
+
     
     # boucle mois par mois
     for mois_num in range(1, 13):
