@@ -241,6 +241,7 @@ if uploaded:
         <img
         src="https://www.allaboutlean.com/wp-content/uploads/2020/01/Normal-Distribution-and-Percentiles.png" width="500">
         <a/>
+        </div>
         
         **RMSE** : Sert à quantifier les différences de températures
         qu'il existe entre les percentiles issues du modèle et celles de la TRACC
