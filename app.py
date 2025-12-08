@@ -230,11 +230,12 @@ if uploaded:
     st.subheader("Précision du modèle : RMSE (°C), RMSE (heures) et précision (%)")
     st.markdown(
         """
-        Percentiles : Une des 99 valeurs qui divisent les données de la TRACC ou du modèle 
+        **Percentiles** : Une des 99 valeurs qui divisent les données de la TRACC ou du modèle 
         en 100 parts égales. Caractérise la distribution des valeurs.
         
-        **exemple** : Le P95 correspond à la température pour laquelle 95% pour des valeurs sont inférieures
-        RMSE : Sert à quantifier les différences de températures
+        **Exemple** : Le P95 correspond à la température pour laquelle 95% pour des valeurs sont inférieures
+        
+        **RMSE** : Sert à quantifier les différences de températures
         qu'il existe entre les percentiles issues du modèle et celles de la TRACC
         """,
         unsafe_allow_html=True
@@ -251,10 +252,10 @@ if uploaded:
     st.subheader("")
 
     # -------- Seuils --------
-    t_sup_thresholds = st.text_input("Seuils Tmax supérieur (°C, séparés par des virgules)", "25,30,35")
-    t_inf_thresholds = st.text_input("Seuils Tmin inférieur (°C, séparés par des virgules)", "-5,0,5")
-    t_sup_thresholds_list = [int(float(x.strip())) for x in t_sup_thresholds.split(",")]
-    t_inf_thresholds_list = [int(float(x.strip())) for x in t_inf_thresholds.split(",")]
+    t_sup_thresholds = st.text_input("Seuils Tmax supérieur (°C, séparés par des virgules)", "25/30/35")
+    t_inf_thresholds = st.text_input("Seuils Tmin inférieur (°C, séparés par des virgules)", "-5/0/5")
+    t_sup_thresholds_list = [int(float(x.strip())) for x in t_sup_thresholds.split("/")]
+    t_inf_thresholds_list = [int(float(x.strip())) for x in t_inf_thresholds.split("/")]
     
     stats_sup = []
     stats_inf = []
