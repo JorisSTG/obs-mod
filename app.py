@@ -1138,8 +1138,8 @@ if uploaded:
     ax.set_ylim(min_val, max_val)
     ax.set_aspect('equal', 'box')
     
-    ax.set_xlabel("PXX Observations (°C)")
-    ax.set_ylabel("PXX Modèle (°C)")
+    ax.set_xlabel("Températures des observations (°C)")
+    ax.set_ylabel("Températures du modèle (°C)")
     ax.set_title("Comparaison des percentiles annuels")
     ax.grid(True, linestyle=':', color='gray', alpha=0.5)
     ax.legend()
@@ -1147,10 +1147,13 @@ if uploaded:
 
     st.markdown(
         """
-        Ce diagramme quantiles-quantiles représente, pour chaque percentile, les valeurs de température issues des observations et celles issues du modèle. Chaque point correspond donc à un percentile allant de P1 à P99, avec des coordonnées .
-        Ce type de représentation permet de comparer directement les deux sources de données sur l’ensemble de la distribution
-        Les coordonnées de chaque percentile sont définies : (x;y) = (T°C observations ; T°C modèle)
-        Chaque croix represente les températures du même percentile (de P1 à P99). Ce diagramme permet alors de comparer les valeurs de températures des deux sources de donnée pour le même percentile.
+        - **Analyse** : Si les croix sont 
+        
+        Ce diagramme quantiles-quantiles représente, pour chaque percentile, les valeurs de température issues des observations et celles issues du modèle.
+        Ce type de représentation permet de comparer directement les deux sources de données sur l’ensemble de la distribution.
+        Chaque croix represente les températures du même percentile (de P1 à P99).
+        Les coordonnées de chaque percentile sont définies par (x;y) = (T°C observations ; T°C modèle)
+        Ce diagramme permet alors de comparer les valeurs de températures des deux sources de donnée pour le même percentile.
         **Interprétation** : L’écart par rapport à la diagonale permet ainsi de quantifier le biais du modèle sur l’ensemble de la distribution, 
         en mettant en évidence d’éventuelles dérives spécifiques aux basses, moyennes ou hautes valeurs de température.
         """,
