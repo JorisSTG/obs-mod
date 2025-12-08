@@ -804,15 +804,9 @@ if uploaded:
     # ============================
 
     st.subheader("Graphiques : jours chauds et nuits tropicales par mois")
-    st.markdown(
-        """
-        
-        """,
-        unsafe_allow_html=True
-    )
 
     # Choix seuil pour Tx
-    tx_seuil = st.number_input("Seuil Tx_jour (°C) pour jours chauds :", min_value=-50.0, max_value=60.0, value=30.0, step=1.0)
+    tx_seuil = st.number_input("Seuil Tx_jour (°C) pour jours chauds :", value=25, step=1)
     tn_seuil = st.number_input("Seuil Tn_jour (°C) (Par défaut 20°C correspondant au seuil d'une nuit tropicale) :", min_value=-50.0, max_value=60.0, value=20.0, step=1.0) 
     
     # Préparer listes pour stocker les valeurs par mois
@@ -1037,7 +1031,7 @@ if uploaded:
     
     # DJC (chauffage)
     if total_DJC_Observations > total_DJC_modele:
-        phrase_djc = f"Observations a une demande de chauffage annuelle plus élevée ({total_DJC_Observations:.0f} °C·jour) que le modèle ({total_DJC_modele:.0f} °C·jour)."
+        phrase_djc = f"Les observations ont une demande de chauffage annuelle plus élevée ({total_DJC_Observations:.0f} °C·jour) que le modèle ({total_DJC_modele:.0f} °C·jour)."
     elif total_DJC_modele > total_DJC_Observations:
         phrase_djc = f"Le modèle a une demande de chauffage annuelle plus élevée ({total_DJC_modele:.0f} °C·jour) que Observations ({total_DJC_Observations:.0f} °C·jour)."
     else:
@@ -1045,7 +1039,7 @@ if uploaded:
     
     # DJF (refroidissement)
     if total_DJF_Observations > total_DJF_modele:
-        phrase_djf = f"Observations a une demande de refroidissement annuelle plus élevée ({total_DJF_Observations:.0f} °C·jour) que le modèle ({total_DJF_modele:.0f} °C·jour)."
+        phrase_djf = f"Les observations ont une demande de refroidissement annuelle plus élevée ({total_DJF_Observations:.0f} °C·jour) que le modèle ({total_DJF_modele:.0f} °C·jour)."
     elif total_DJF_modele > total_DJF_Observations:
         phrase_djf = f"Le modèle a une demande de refroidissement annuelle plus élevée ({total_DJF_modele:.0f} °C·jour) que Observations ({total_DJF_Observations:.0f} °C·jour)."
     else:
@@ -1113,20 +1107,20 @@ if uploaded:
         )
         i+=1
     
-    ax.set_title(f"Percentiles {percentiles_list} – Modèle vs Observations {file_sel}")
+    ax.set_title(f"Percentiles {percentiles_list2} – Modèle vs Observations {file_sel}")
     ax.set_ylabel("Température (°C)")
     ax.tick_params(axis="x", rotation=45)
     ax.legend(ncol=2, facecolor="black")
     st.pyplot(fig)
     plt.close(fig)
 
-        # -------- Calcul des percentiles P1 à P100 --------
+    # -------- Calcul des percentiles P1 à P100 --------
     percentiles = np.arange(1, 101)
     P_obs = np.percentile(obs_annee, percentiles)
     P_mod = np.percentile(model_annee, percentiles)
     
     # -------- Graphique PXX modèle vs TRACC avec croix et couleurs conditionnelles --------
-    fig, ax = plt.subplots(figsize=(6,6))
+    fig, ax = plt.subplots(figsize=(4,4))
     
     # Définir les couleurs selon qui est plus chaud
     colors = [couleur_Observations if obs > mod else couleur_modele for obs, mod in zip(P_obs, P_mod)]
@@ -1150,6 +1144,8 @@ if uploaded:
     ax.grid(True, linestyle=':', color='gray', alpha=0.5)
     ax.legend()
     st.pyplot(fig)
+
+    st.mark
 
 
     # -------- Graphiques CDF et percentiles --------
