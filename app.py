@@ -519,7 +519,8 @@ if uploaded:
     # ============================
     st.subheader("Évolution mensuelle : Tn_mois / Tmoy_mois / Tx_mois (Modèle vs Observations)")
     st.markdown(
-        """  
+        """
+        - Tn_mois et Tx_mois sont respectivement la températures minimale et maximal du mois
         - Les valeurs tracées représentent les températures minimales et maximales **absolues** du mois (c’est-à-dire P0 et P100)
         - De ce fait, les températures du mois ne dépassent jamais les bornes définies par Tn_mois et Tx_mois.
         - La température moyenne (Tmoy_mois) correspond à la moyenne mensuelle calculée sur l’ensemble des pas de temps. 
@@ -616,19 +617,19 @@ if uploaded:
     
     # Générer les phrases
     if mean_Observations_Tx > mean_Model_Tx:
-        phrase_Tx = "En moyenne, les observations sont plus chaudes que le modèle pour les températures maximales (Tx)."
+        phrase_Tx = "En moyenne, les observations sont plus chaudes que le modèle pour les températures maximales (Tx_mois)."
     else:
-        phrase_Tx = "En moyenne, le modèle est plus chaud que les observations pour les températures maximales (Tx)."
+        phrase_Tx = "En moyenne, le modèle est plus chaud que les observations pour les températures maximales (Tx_mois)."
     
     if mean_Observations_Tm > mean_Model_Tm:
-        phrase_Tm = "En moyenne, les observations sont plus chaudes que le modèle pour les températures moyennes (Tmoy)."
+        phrase_Tm = "En moyenne, les observations sont plus chaudes que le modèle pour les températures moyennes (Tmoy_mois)."
     else:
-        phrase_Tm = "En moyenne, le modèle est plus chaud que les observations pour les températures moyennes (Tmoy)."
+        phrase_Tm = "En moyenne, le modèle est plus chaud que les observations pour les températures moyennes (Tmoy_mois)."
     
     if mean_Observations_Tn > mean_Model_Tn:
-        phrase_Tn = "En moyenne, les observations sont plus chaudes que le modèle pour les températures minimales (Tn)."
+        phrase_Tn = "En moyenne, les observations sont plus chaudes que le modèle pour les températures minimales (Tn_mois)."
     else:
-        phrase_Tn = "En moyenne, le modèle est plus chaud que les observations pour les températures minimales (Tn)."
+        phrase_Tn = "En moyenne, le modèle est plus chaud que les observations pour les températures minimales (Tn_mois)."
     
     # Stocker dans st.session_state pour pouvoir les réutiliser dans la page Résumé
     st.session_state["resume_temp"] = [phrase_Tx, phrase_Tm, phrase_Tn]
@@ -642,11 +643,13 @@ if uploaded:
     # ============================
     #  SECTION: Tn / Tmoy / Tx journaliers
     # ============================
-    st.subheader("Tn_jour / Tmoy_jour /  — CDF par mois et tableaux de percentiles")
+    st.subheader("Tn_jour / Tmoy_jour / Tx_jour — CDF par mois et tableaux de percentiles")
 
     st.markdown(
         """
-        A
+        - Tn_jour et Tx_jour sont respectivement la températures minimale et maximal de la journée
+        - Ici, les températures Tn Tmoy et Tx sont décrite selon les percentiles pour chaque mois. Chaque mois compte 30 Tn,Tmoy et Tx. Ces valeurs sont classés selon leur valeur et redonné selon certains percentiles.
+        - **Exemple Tn** : La valeur du P25 de Tn du mois signifie que 25% des températures minimales journalières du mois sont inférieures à cette valeur.
         """,
         unsafe_allow_html=True
     )
