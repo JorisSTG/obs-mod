@@ -260,13 +260,19 @@ if uploaded:
     
     precision_annuelle = precision_overlap(model_annee, obs_annee)
     st.subheader(f"Précision globale annuelle : {precision_annuelle} %")
-            <div style="text-align: center ;">
+
+    st.markdown(
+        """
+        <div style="text-align: center ;">
         <a href="https://www.researchgate.net/profile/Md-Haidar-Sharif/publication/220804172/figure/fig3/AS:295583899242509@1447484101456/Bhattacharyya-distance-surrounds-altogether-for-one-dimensional-example-of-twosomes-of.png"
         target="_blank">
         <img
         src="https://www.researchgate.net/profile/Md-Haidar-Sharif/publication/220804172/figure/fig3/AS:295583899242509@1447484101456/Bhattacharyya-distance-surrounds-altogether-for-one-dimensional-example-of-twosomes-of.png" width="500">
         <a/>
         </div>
+        """,
+        unsafe_allow_html=True
+    )
     st.subheader("")
 
     # -------- Seuils --------
