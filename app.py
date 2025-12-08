@@ -807,7 +807,7 @@ if uploaded:
 
     # Choix seuil pour Tx
     tx_seuil = st.number_input("Seuil Tx_jour (°C) pour jours chauds :", value=25, step=1)
-    tn_seuil = st.number_input("Seuil Tn_jour (°C) (Par défaut 20°C correspondant au seuil d'une nuit tropicale) :", min_value=-50.0, max_value=60.0, value=20.0, step=1.0) 
+    tn_seuil = st.number_input("Seuil Tn_jour (°C) (Par défaut 20°C correspondant au seuil d'une nuit tropicale) :" value=20, step=1) 
     
     # Préparer listes pour stocker les valeurs par mois
     jours_chauds_Observations = []
