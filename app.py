@@ -235,7 +235,7 @@ if uploaded:
         
         **Exemple** : Le P95 correspond à la température pour laquelle 95% pour des valeurs sont inférieures
         
-        <dic style="text-align: center ;">
+        <div style="text-align: center ;">
         <a href="https://www.allaboutlean.com/wp-content/uploads/2020/01/Normal-Distribution-and-Percentiles.png"
         target="_blank">
         <img
