@@ -857,6 +857,9 @@ if uploaded:
     ax.legend(fontsize='large')
     st.pyplot(fig)
     plt.close(fig)
+
+    pct_precision_Tn = precision_overlap(mod_counts_Tn, obs_count_Tn)
+    st.write(f"Précision du modèle sur les Tx_jour {pct_precision_Tn} %")
     
     # ---------------- FIGURE Tx ----------------
     fig, ax = plt.subplots(figsize=(15, 5))
@@ -871,6 +874,9 @@ if uploaded:
     ax.legend(fontsize='large')
     st.pyplot(fig)
     plt.close(fig)
+
+    pct_precision_Tx = precision_overlap(mod_counts_Tx, obs_count_Tx)
+    st.write(f"Précision du modèle sur les Tn_jour {pct_precision_Tx} %")
 
     # ============================
     # GRAPHIQUES : Jours chauds et nuits tropicales par mois
