@@ -931,8 +931,6 @@ if uploaded:
     
     st.subheader("Tableaux : jours chauds et nuits tropicales par mois")
     
-    import pandas as pd
-    
     # Tableau jours chauds
     df_jours_chauds = pd.DataFrame({
         "Mois": mois_labels,
@@ -942,8 +940,8 @@ if uploaded:
     
     df_jours_chauds["Différence (Modèle - Obs)"] = df_jours_chauds["Modèle"] - df_jours_chauds["Observations"]
     
-    st.markdown("### 📊 Jours chauds par mois")
-    st.dataframe(df_jours_chauds, use_container_width=True)
+    st.markdown("Jours chauds par mois")
+    st.dataframe(df_jours_chauds, use_container_width=True, hide_index=True)
     
     
     # Tableau nuits tropicales
@@ -955,8 +953,8 @@ if uploaded:
     
     df_nuits_trop["Différence (Modèle - Obs)"] = df_nuits_trop["Modèle"] - df_nuits_trop["Observations"]
     
-    st.markdown("### 🌙 Nuits tropicales par mois")
-    st.dataframe(df_nuits_trop, use_container_width=True)
+    st.markdown("Nuits tropicales par mois")
+    st.dataframe(df_nuits_trop, use_container_width=True, hide_index=True)
     
     # ---- Diagramme jours chauds ----
     fig, ax = plt.subplots(figsize=(14, 4))
