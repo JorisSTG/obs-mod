@@ -899,7 +899,7 @@ if uploaded:
         "Modèle": jours_vague_mod
     })
     st.subheader("Nombre de jours de vague de chaleur par mois")
-    st.dataframe(df_vagues)
+    st.dataframe(df_vagues, hide_index=True, use_container_width=True)
     
     # ---------------- Graphique bâtons ----------------
     fig, ax = plt.subplots(figsize=(12, 5))
