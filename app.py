@@ -880,6 +880,80 @@ if uploaded:
     pct_precision_Tx = precision_overlap(mod_counts_Tx, obs_counts_Tx)
     st.write(f"Précision du modèle sur les Tx_jour : **{pct_precision_Tx} %**")
 
+
+    # --- Fonction nombre de jours de vague (déjà corrigée) ---
+    def nombre_jours_vague(T):
+        T = np.array(T)
+        n = len(T)
+        jours_vague = np.zeros(n, dtype=bool)
+        jours_vague[T >= 25.3] = True
+        i = 0
+        while i < n:
+            if i + 2 < n and np.all(T[i:i+3] >= 23.4):
+                debut = i
+                fin = i + 2
+                j = fin + 1
+                while j < n and T[j] >= 23.4:
+                    fin = j
+                    j += 1
+                prolong = fin + 1
+                compteur = 0
+                while prolong < n and compteur < 2:
+                    if T[prolong] < 22.4:
+                        break
+                    fin = prolong
+                    compteur += 1
+                    prolong += 1
+                jours_vague[debut:fin+1] = True
+                i = fin + 1
+            else:
+                i += 1
+        return int(jours_vague.sum()), jours_vague
+    
+    # ---------------- Exemple de données mensuelles ----------------
+    # Tn_jour_obs/mois et Tx_jour_obs/mois sont des listes de 12 éléments (1 par mois)
+    # Chaque élément = tableau des jours du mois
+    # Même structure pour le modèle
+    # Ici un exemple fictif pour montrer la structure :
+    Tn_jour_obs = [np.random.uniform(10, 20, size=30) for _ in range(12)]
+    Tx_jour_obs = [np.random.uniform(20, 35, size=30) for _ in range(12)]
+    Tn_jour_mod = [np.random.uniform(11, 21, size=30) for _ in range(12)]
+    Tx_jour_mod = [np.random.uniform(21, 36, size=30) for _ in range(12)]
+    
+    # ---------------- Calcul Tm et nombre de jours de vague par mois ----------------
+    jours_vague_obs = []
+    jours_vague_mod = []
+    
+    for mois in range(12):
+        Tm_obs = (Tx_jour_obs[mois] + Tn_jour_obs[mois])/2
+        Tm_mod = (Tx_jour_mod[mois] + Tn_jour_mod[mois])/2
+        nb_obs, _ = nombre_jours_vague(Tm_obs)
+        nb_mod, _ = nombre_jours_vague(Tm_mod)
+        jours_vague_obs.append(nb_obs)
+        jours_vague_mod.append(nb_mod)
+    
+    # ---------------- Tableau ----------------
+    df_vagues = pd.DataFrame({
+        "Mois": range(1, 13),
+        "Observations": jours_vague_obs,
+        "Modèle": jours_vague_mod
+    })
+    st.subheader("Nombre de jours de vague de chaleur par mois")
+    st.dataframe(df_vagues)
+    
+    # ---------------- Graphique bâtons ----------------
+    fig, ax = plt.subplots(figsize=(12, 5))
+    x = np.arange(1, 13)
+    ax.bar(x - 0.2, jours_vague_obs, width=0.4, label="Observations", color=couleur_Observations) 
+    ax.bar(x + 0.2, jours_vague_mod, width=0.4, label="Modèle", color=couleur_modele)
+    ax.set_xlabel("Mois")
+    ax.set_ylabel("Nombre de jours de vague de chaleur")
+    ax.set_title("Nombre de jours de vague de chaleur par mois : Observations vs Modèle")
+    ax.set_xticks(x)
+    ax.legend()
+    st.pyplot(fig)
+    plt.close(fig)
+
     # ============================
     # GRAPHIQUES : Jours chauds et nuits tropicales par mois
     # ============================
