@@ -39,9 +39,6 @@ else:
 st.subheader("Précision du modèle : RMSE et percentiles")
 st.dataframe(st.session_state["df_rmse_styled"], hide_index=True)
 
-# --- Analyse des mois peu précis ---
-df_rmse = st.session_state["df_rmse"]
-mois_pas_precis = [mois for mois, pct in zip(df_rmse["Mois"], df_rmse["Précision percentile (%)"]) if pct < 60]
 
 if mois_pas_precis:
     st.markdown("**Mois avec une mauvaise précision :** " + ", ".join(mois_pas_precis))
